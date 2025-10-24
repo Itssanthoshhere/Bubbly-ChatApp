@@ -1,4 +1,11 @@
-import { TextProps, TextStyle, TouchableOpacityProps, ViewStyle } from "react-native";
+import {
+    TextInput,
+    TextInputProps,
+  TextProps,
+  TextStyle,
+  TouchableOpacityProps,
+  ViewStyle,
+} from "react-native";
 
 export type TypoProps = {
   size?: number;
@@ -8,6 +15,15 @@ export type TypoProps = {
   style?: TextStyle;
   textProps?: TextProps;
 };
+
+export interface InputProps extends TextInputProps {
+  icon?: React.ReactNode;
+  containerStyle?: ViewStyle;
+  inputStyle?: TextStyle;
+  inputRef?: React.RefObject<TextInput>;
+  //   label?: string;
+  //   error?: string;
+}
 
 export type ScreenWrapperProps = {
   style?: ViewStyle;
@@ -23,3 +39,9 @@ export interface ButtonProps extends TouchableOpacityProps {
   loading?: boolean;
   children: React.ReactNode;
 }
+
+export type BackButtonProps = {
+  style?: ViewStyle;
+  color?: string;
+  iconSize?: number;
+};
