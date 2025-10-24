@@ -21,9 +21,10 @@ const Input = (props: InputProps) => {
         style={[styles.input, props.inputStyle]}
         placeholderTextColor={colors.neutral400}
         ref={props.inputRef && props.inputRef}
+        {...props}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        {...props}
+      />
       />
     </View>
   );
