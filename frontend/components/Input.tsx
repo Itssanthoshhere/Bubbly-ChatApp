@@ -25,8 +25,6 @@ const Input = (props: InputProps) => {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
-       />
-     </View>
     </View>
   );
 };
