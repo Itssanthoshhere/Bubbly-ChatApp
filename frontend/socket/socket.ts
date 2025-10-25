@@ -24,8 +24,8 @@ export async function connectSocket(): Promise<Socket> {
       });
     });
 
-    // Disconnect connection
-    socket.on("disconnected", () => {
++    // Handle disconnection
++    socket.on("disconnect", () => {
       console.log("Socket Disconnected");
     });
   }
