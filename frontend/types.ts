@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   TextInput,
   TextInputProps,
@@ -77,4 +78,18 @@ export type BackButtonProps = {
   style?: ViewStyle;
   color?: string;
   iconSize?: number;
+};
+
+export type AvatarProps = {
+  size?: number;
+  uri: string | null;
+  style?: ViewStyle;
+  isGroup?: boolean;
+};
+
+export type HeaderProps = {
+  title?: string;
+  style?: ViewStyle;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
 };
