@@ -24,12 +24,10 @@ export async function connectSocket(): Promise<Socket> {
       });
     });
 
-    +(
-      // Handle disconnection
-      (+socket.on("disconnect", () => {
-        console.log("Socket Disconnected");
-      }))
-    );
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      console.log("Socket Disconnected");
+    });
   }
 
   return socket;
