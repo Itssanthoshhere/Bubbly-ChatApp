@@ -1,4 +1,4 @@
-import { Server as SocketIOServer, Socket } from "socket.io";
+import { Socket, Server as SocketIOServer } from "socket.io";
 import User from "../models/User.ts";
 import { generateToken } from "../utils/token.ts";
 

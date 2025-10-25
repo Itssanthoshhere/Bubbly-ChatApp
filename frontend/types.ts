@@ -67,6 +67,12 @@ export type ScreenWrapperProps = {
   bgOpacity?: number;
 };
 
+export type ResponseProps = {
+  success: boolean;
+  data?: any;
+  msg?: string;
+};
+
 export interface ButtonProps extends TouchableOpacityProps {
   style?: ViewStyle;
   onPress?: () => void;
