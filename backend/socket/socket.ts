@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { register } from "module";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { registerUserEvents } from "./userEvents.ts";
 
