@@ -188,7 +188,7 @@ const Home = () => {
                       item={item}
                       key={index}
                       router={router}
-                      showDivider={directConversions.length != index + 1}
+                      showDivider={groupConversions.length != index + 1}
                     />
                   );
                 })}
