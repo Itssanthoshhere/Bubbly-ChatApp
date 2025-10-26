@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -19,11 +19,14 @@ import Typo from "@/components/Typo";
 import { useAuth } from "@/contexts/authContext";
 import Button from "@/components/Button";
 import { verticalScale } from "@/utils/styling";
+import { getContacts, newConversation } from "@/socket/socketEvents";
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 const NewConversationModal = () => {
   const { isGroup } = useLocalSearchParams();
   const isGroupMode = isGroup == "1";
   const router = useRouter();
+  const [contacts, setContacts] = useState([]);
   const [groupAvatar, setGroupAvatar] = useState<{ uri: string } | null>(null);
   const [groupName, setGroupName] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
@@ -33,6 +36,48 @@ const NewConversationModal = () => {
 
   // NOTE: Getting the current user
   const { user: currentUser } = useAuth();
+
+  useEffect(() => {
+    getContacts(processGetContacts);
+    newConversation(processNewConversation);
+    getContacts(null);
+
+    return () => {
+      getContacts(processGetContacts, true);
+      newConversation(processNewConversation, true);
+    };
+  }, []);
+
+  const processGetContacts = (res: any) => {
+    // console.log("Got Contacts: ", res);
+
+    if (res.success) {
+      setContacts(res.data);
+    }
+  };
+
+  const processNewConversation = (res: any) => {
+    // console.log("New Conversation result: ", res.data.participants);
+
+    setIsLoading(false);
+
+    if (res.success) {
+      router.back();
+      router.push({
+        pathname: "/(main)/conversation",
+        params: {
+          id: res.data._id,
+          name: res.data.name,
+          avatar: res.data.avatar,
+          type: res.data.type,
+          participants: JSON.stringify(res.data.participants),
+        },
+      });
+    } else {
+      console.log("Error fetching/creating conversation: ", res.msg);
+      Alert.alert("Error", res.msg);
+    }
+  };
 
   // NOTE: Image picker
   const onPickImage = async () => {
@@ -71,6 +116,10 @@ const NewConversationModal = () => {
       toggleParticipant(user);
     } else {
       // TODO: Start new conversation
+      newConversation({
+        type: "direct",
+        participants: [currentUser.id, user.id],
+      });
     }
   };
 
@@ -80,70 +129,97 @@ const NewConversationModal = () => {
     }
 
     // TODO: Create group
+    setIsLoading(true);
+
+    try {
+      let avatar = null;
+      if (groupAvatar) {
+        const uploadResult = await uploadFileToCloudinary(
+          groupAvatar,
+          "group-avatars"
+        );
+
+        if (uploadResult.success) {
+          avatar = uploadResult.data;
+        }
+      }
+
+      newConversation({
+        type: "group",
+        participants: [currentUser.id, ...selectedParticipants],
+        name: groupName,
+        avatar,
+      });
+    } catch (error: any) {
+      console.log("Error creating group: ", error);
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // NOTE: Dummy contacts unitl we fetch api
-  const contacts = [
-    {
-      id: "1",
-      name: "Joe",
-      avatar: "https://i.pravatar.cc/150?img=11",
-    },
+  // const contacts = [
+  //   {
+  //     id: "1",
+  //     name: "Joe",
+  //     avatar: "https://i.pravatar.cc/150?img=11",
+  //   },
 
-    {
-      id: "2",
-      name: "Vasan",
-      avatar: "https://i.pravatar.cc/150?img=12",
-    },
+  //   {
+  //     id: "2",
+  //     name: "Vasan",
+  //     avatar: "https://i.pravatar.cc/150?img=12",
+  //   },
 
-    {
-      id: "3",
-      name: "Ram",
-      avatar: "https://i.pravatar.cc/150?img=13",
-    },
+  //   {
+  //     id: "3",
+  //     name: "Ram",
+  //     avatar: "https://i.pravatar.cc/150?img=13",
+  //   },
 
-    {
-      id: "4",
-      name: "Sai",
-      avatar: "https://i.pravatar.cc/150?img=14",
-    },
+  //   {
+  //     id: "4",
+  //     name: "Sai",
+  //     avatar: "https://i.pravatar.cc/150?img=14",
+  //   },
 
-    {
-      id: "5",
-      name: "Loe Das",
-      avatar: "https://i.pravatar.cc/150?img=15",
-    },
+  //   {
+  //     id: "5",
+  //     name: "Loe Das",
+  //     avatar: "https://i.pravatar.cc/150?img=15",
+  //   },
 
-    {
-      id: "6",
-      name: "Ramesh",
-      avatar: "https://i.pravatar.cc/150?img=16",
-    },
+  //   {
+  //     id: "6",
+  //     name: "Ramesh",
+  //     avatar: "https://i.pravatar.cc/150?img=16",
+  //   },
 
-    {
-      id: "7",
-      name: "Kumar",
-      avatar: "https://i.pravatar.cc/150?img=17",
-    },
+  //   {
+  //     id: "7",
+  //     name: "Kumar",
+  //     avatar: "https://i.pravatar.cc/150?img=17",
+  //   },
 
-    {
-      id: "8",
-      name: "Kishore",
-      avatar: "https://i.pravatar.cc/150?img=18",
-    },
+  //   {
+  //     id: "8",
+  //     name: "Kishore",
+  //     avatar: "https://i.pravatar.cc/150?img=18",
+  //   },
 
-    {
-      id: "9",
-      name: "Raghul",
-      avatar: "https://i.pravatar.cc/150?img=19",
-    },
+  //   {
+  //     id: "9",
+  //     name: "Raghul",
+  //     avatar: "https://i.pravatar.cc/150?img=19",
+  //   },
 
-    {
-      id: "10",
-      name: "Mike",
-      avatar: "https://i.pravatar.cc/150?img=20",
-    },
-  ];
+  //   {
+  //     id: "10",
+  //     name: "Mike",
+  //     avatar: "https://i.pravatar.cc/150?img=20",
+  //   },
+  // ];
 
   return (
     <ScreenWrapper isModal={true}>
