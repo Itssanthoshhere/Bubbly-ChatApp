@@ -202,7 +202,7 @@ const Home = () => {
 
             {!loading && selectedTab == 1 && groupConversions.length == 0 && (
               <Typo style={{ textAlign: "center" }}>
-                You don't have joined any groups yet
+                You haven't joined any groups yet
               </Typo>
             )}
 
