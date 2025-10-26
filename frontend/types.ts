@@ -1,3 +1,4 @@
+import { Router } from "expo-router";
 import { ReactNode } from "react";
 import {
   TextInput,
@@ -98,4 +99,34 @@ export type HeaderProps = {
   style?: ViewStyle;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+};
+
+export type ConversationListItemProps = {
+  item: ConversationProps;
+  showDivider: boolean;
+  isGroup?: boolean;
+  router: Router;
+};
+
+export type ConversationProps = {
+  _id: string;
+  type: "direct" | "group";
+  avatar: string | null;
+  participants: {
+    _id: string;
+    name: string;
+    avatar: string;
+    email: string;
+  }[];
+  name?: string;
+  lastMessage?: {
+    _id: string;
+    content: string;
+    senderId: string;
+    type: "text" | "image" | "file";
+    attachment?: string;
+    createdAt: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 };

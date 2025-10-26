@@ -4,12 +4,28 @@ import { colors, spacingX, spacingY } from "@/constants/theme";
 import Avatar from "./Avatar";
 import Typo from "./Typo";
 import moment from "moment";
+import { ConversationListItemProps } from "@/types";
+import { useAuth } from "@/contexts/authContext";
 
-const ConversationItem = ({ item, showDivider, router }: any) => {
-  const openConversation = () => {};
+const ConversationItem = ({
+  item,
+  showDivider,
+  router,
+}: ConversationListItemProps) => {
+  const { user: currentUserId } = useAuth();
+
+  // console.log("Conversation item: ", item);
 
   const lastMessage: any = item.lastMessage;
   const isDirect = item.type == "direct";
+
+  let avatar = item.avatar;
+  const otherParticipant = isDirect
+    ? item.participants.find((p) => p._id != currentUserId?.id)
+    : null;
+  if (isDirect && otherParticipant) {
+    avatar = otherParticipant?.avatar;
+  }
 
   const getLastMessageContent = () => {
     if (!lastMessage) {
@@ -36,6 +52,19 @@ const ConversationItem = ({ item, showDivider, router }: any) => {
     return messageDate.format("MMM D, YYYY");
   };
 
+  const openConversation = () => {
+    router.push({
+      pathname: "/(main)/conversation",
+      params: {
+        id: item._id,
+        name: item.name,
+        avatar: item.avatar,
+        type: item.type,
+        participants: JSON.stringify(item.participants),
+      },
+    });
+  };
+
   return (
     <View>
       <TouchableOpacity
@@ -43,13 +72,13 @@ const ConversationItem = ({ item, showDivider, router }: any) => {
         onPress={openConversation}
       >
         <View>
-          <Avatar uri={null} size={47} isGroup={item.type == "group"} />
+          <Avatar uri={avatar} size={47} isGroup={item.type == "group"} />
         </View>
 
         <View style={{ flex: 1 }}>
           <View style={styles.row}>
             <Typo size={17} fontWeight={"600"}>
-              {item?.name}
+              {isDirect ? otherParticipant?.name : item?.name}
             </Typo>
 
             {item.lastMessage && <Typo size={15}>{getLastMessageDate()}</Typo>}
