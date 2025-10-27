@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -24,6 +24,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import Loading from "@/components/Loading";
 import { uploadFileToCloudinary } from "@/services/imageService";
+import { getMessages, newMessage } from "@/socket/socketEvents";
+import { MessageProps, ResponseProps } from "@/types";
 
 const Conversation = () => {
   const { user: currentUser } = useAuth();
@@ -40,6 +42,7 @@ const Conversation = () => {
     null
   );
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const participants = JSON.parse(stringifiedParticipants as string);
 
@@ -56,52 +59,83 @@ const Conversation = () => {
   let conversationName = isDirect ? otherParticipant.name : name;
   // console.log("Got Conversation Data: ", data);
 
-  // NOTE: Dummy Messages
-  const names = [
-    "Alice",
-    "Bob",
-    "Charlie",
-    "David",
-    "Eve",
-    "Fay",
-    "Grace",
-    "Hank",
-    "Ivy",
-    "Jack",
-  ];
-  const sampleMessages = [
-    "Hey there!",
-    "How's it going?",
-    "Did you see the news?",
-    "Let's catch up later.",
-    "That sounds great!",
-    "I totally agree with you.",
-    "Can you send me the file?",
-    "LOL, that's funny!",
-    "I'll be there in 10 mins.",
-    "Thanks for the update!",
-  ];
+  useEffect(() => {
+    newMessage(newMessageHandler);
+    getMessages(messagesHandler);
 
-  const dummyMessages = Array.from({ length: 10 }, (_, i) => {
-    const randomName = names[Math.floor(Math.random() * names.length)];
-    const randomContent =
-      sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
-    return {
-      id: `msg_${i + 1}`,
-      sender: {
-        id: `user_${Math.floor(Math.random() * 100)}`,
-        name: randomName,
-        avatar: null,
-      },
-      content: randomContent,
-      createdAt: `${Math.floor(Math.random() * 12 + 1)}:${Math.floor(
-        Math.random() * 60
-      )
-        .toString()
-        .padStart(2, "0")} ${Math.random() > 0.5 ? "AM" : "PM"}`,
-      isMe: Math.random() > 0.5,
+    getMessages({ conversationId });
+
+    return () => {
+      newMessage(newMessageHandler, true);
+      getMessages(messagesHandler, true);
     };
-  });
+  }, []);
+
+  const newMessageHandler = (res: ResponseProps) => {
+    setLoading(false);
+    // console.log("Got new message response: ", res);
+
+    if (res.success) {
+      if (res.data.conversationId == conversationId) {
+        setMessages((prev) => [res.data as MessageProps, ...prev]);
+      } else {
+        Alert.alert("Error", res.msg);
+      }
+    }
+  };
+
+  const messagesHandler = (res: ResponseProps) => {
+    if (res.success) {
+      setMessages(res.data);
+    }
+  };
+
+  // NOTE: Dummy Messages
+  // const names = [
+  //   "Alice",
+  //   "Bob",
+  //   "Charlie",
+  //   "David",
+  //   "Eve",
+  //   "Fay",
+  //   "Grace",
+  //   "Hank",
+  //   "Ivy",
+  //   "Jack",
+  // ];
+  // const sampleMessages = [
+  //   "Hey there!",
+  //   "How's it going?",
+  //   "Did you see the news?",
+  //   "Let's catch up later.",
+  //   "That sounds great!",
+  //   "I totally agree with you.",
+  //   "Can you send me the file?",
+  //   "LOL, that's funny!",
+  //   "I'll be there in 10 mins.",
+  //   "Thanks for the update!",
+  // ];
+
+  // const dummyMessages = Array.from({ length: 10 }, (_, i) => {
+  //   const randomName = names[Math.floor(Math.random() * names.length)];
+  //   const randomContent =
+  //     sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
+  //   return {
+  //     id: `msg_${i + 1}`,
+  //     sender: {
+  //       id: `user_${Math.floor(Math.random() * 100)}`,
+  //       name: randomName,
+  //       avatar: null,
+  //     },
+  //     content: randomContent,
+  //     createdAt: `${Math.floor(Math.random() * 12 + 1)}:${Math.floor(
+  //       Math.random() * 60
+  //     )
+  //       .toString()
+  //       .padStart(2, "0")} ${Math.random() > 0.5 ? "AM" : "PM"}`,
+  //     isMe: Math.random() > 0.5,
+  //   };
+  // });
 
   // console.log(dummyMessages);
 
@@ -147,7 +181,19 @@ const Conversation = () => {
         }
       }
 
-      // console.log("Attachment: ", attachment);
+      newMessage({
+        conversationId,
+        sender: {
+          id: currentUser?.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+        },
+        content: message.trim(),
+        attachment,
+      });
+
+      setMessage("");
+      setSelectedFile(null);
     } catch (error) {
       console.log("Error sending message: ", error);
       Alert.alert("Error", "Failed to send message");
@@ -191,7 +237,7 @@ const Conversation = () => {
         {/* Messages  */}
         <View style={styles.content}>
           <FlatList
-            data={dummyMessages}
+            data={messages}
             inverted={true}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messageContent}
