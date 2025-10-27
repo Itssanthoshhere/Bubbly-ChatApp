@@ -1,7 +1,7 @@
 <div align="center">
  <br /> 
    <a href="https://github.com/Itssanthoshhere/Bubbly-ChatApp" target="_blank">
-    <img src="./frontend/assets/readme/bubblyPreview.mp4" alt="Project Banner" />
+    <img src="./frontend/assets/readme/hero.png" alt="Project Banner" />
   </a> 
   <div>
     <img src="https://img.shields.io/badge/-React%20Native-61DBFB?style=for-the-badge&logo=react&logoColor=white"/>
