@@ -36,7 +36,7 @@ const Home = () => {
     return () => {
       getConversations(processConversations, true);
       newConversation(newConversationHandler, true);
-      newConversation(newMessageHandler, true);
+      newMessage(newMessageHandler, true);
     };
   }, []);
 
