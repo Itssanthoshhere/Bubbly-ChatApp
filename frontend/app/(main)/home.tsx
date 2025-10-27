@@ -11,7 +11,11 @@ import { useRouter } from "expo-router";
 import ConversationItem from "@/components/ConversationItem";
 import Loading from "@/components/Loading";
 import Button from "@/components/Button";
-import { getConversations, newConversation } from "@/socket/socketEvents";
+import {
+  getConversations,
+  newConversation,
+  newMessage,
+} from "@/socket/socketEvents";
 import { ConversationProps, ResponseProps } from "@/types";
 
 const Home = () => {
@@ -25,14 +29,31 @@ const Home = () => {
   useEffect(() => {
     getConversations(processConversations);
     newConversation(newConversationHandler);
+    newMessage(newMessageHandler);
 
     getConversations(null);
 
     return () => {
       getConversations(processConversations, true);
       newConversation(newConversationHandler, true);
+      newConversation(newMessageHandler, true);
     };
   }, []);
+
+  const newMessageHandler = (res: ResponseProps) => {
+    if (res.success) {
+      let conversationId = res.data.conversationId;
+      setConversations((prev) => {
+        let updatedConversations = prev.map((item) => {
+          if (item._id == conversationId) item.lastMessage = res.data;
+
+          return item;
+        });
+
+        return updatedConversations;
+      });
+    }
+  };
 
   const processConversations = (res: ResponseProps) => {
     // console.log("res: ", res);
