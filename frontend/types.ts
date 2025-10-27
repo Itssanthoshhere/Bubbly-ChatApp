@@ -130,3 +130,16 @@ export type ConversationProps = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type MessageProps = {
+  id: string;
+  sender: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+  content: string;
+  attachement?: string | null;
+  isMe?: boolean;
+  createdAt: string;
+};
